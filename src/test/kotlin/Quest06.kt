@@ -12,7 +12,7 @@ object Quest06 {
         val ingredients = data["NULL"]?.toMutableSet() ?: return 0
         while (true) {
             val ps = ingredients.size
-            ingredients += ingredients.flatMap { i -> data[i]?.filter { it != "NULL" } ?: emptyList() }.toSet()
+            ingredients += ingredients.flatMap { i -> data[i]?.filter { it != "NULL" } ?: emptyList() }
             if (ingredients.size == ps) return ingredients.size
         }
     }
@@ -23,7 +23,7 @@ object Quest06 {
         val ingredients = data.filter { name in it.value }.keys.toMutableSet()
         while (true) {
             val ps = ingredients.size
-            ingredients += ingredients.flatMap { n -> data.filter { it.key != name && n in it.value }.keys }.toSet()
+            ingredients += ingredients.flatMap { n -> data.filter { it.key != name && n in it.value }.keys }
             if (ingredients.size == ps) return ingredients
         }
     }
