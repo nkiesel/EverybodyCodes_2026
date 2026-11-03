@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.versions.update)
-    alias(libs.plugins.testballon)
+    alias(libs.plugins.testBalloon)
 }
 
 version = "2026"
@@ -42,7 +42,7 @@ kotlin {
         test {
             dependencies {
                 implementation(libs.kotest.assertions.core)
-                implementation(libs.testballon.framework.core)
+                implementation(libs.testBalloon.framework.core)
             }
         }
     }
