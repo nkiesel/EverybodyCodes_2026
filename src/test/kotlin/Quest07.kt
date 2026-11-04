@@ -4,12 +4,6 @@ import io.kotest.matchers.shouldBe
 object Quest07 {
     private fun parse(input: List<String>) = input.associate { Stage(it) }
 
-    fun one(input: List<String>): Int {
-        val stages = parse(input)
-        stages.values.maxBy { it.connections.size }.sendImpulse(5, stages)
-        return stages.values.sumOf { it.energy }
-    }
-
     private data class Stage(var energy: Int, val connections: List<Int>) {
         companion object {
             operator fun invoke(input: String): Pair<Int, Stage> =
@@ -22,6 +16,12 @@ object Quest07 {
         }
     }
 
+    fun one(input: List<String>): Int {
+        val stages = parse(input)
+        stages.values.maxBy { it.connections.size }.sendImpulse(5, stages)
+        return stages.values.sumOf { it.energy }
+    }
+
     fun two(input: List<String>): Int {
         val stages = parse(input)
         stages.values.maxBy { it.connections.size }.sendImpulse(10, stages)
@@ -29,29 +29,28 @@ object Quest07 {
     }
 
     fun three(input: List<String>, limit: Int = 1000000): Int {
-        val stages = parse(input)
+        val parsed = parse(input)
         var maxEnergy = 0
-        for (id in stages.keys) {
-            val sm = stages.mapValues { it.value.copy() }.toMutableMap()
-            var receiving = sm.keys.associateWith { IntArray(11) }
+        for (id in parsed.keys) {
+            val stages = parsed.mapValues { it.value.copy() }.toMutableMap()
+            var receiving = stages.keys.associateWith { IntArray(11) }
             receiving[id]!![10] = 1
             while (receiving.isNotEmpty()) {
-                val nr = sm.keys.associateWith { IntArray(11) }
+                val nr = stages.keys.associateWith { IntArray(11) }
                 for ((k, v) in receiving) {
-                    val s = sm[k] ?: continue
+                    val s = stages[k] ?: continue
                     s.energy += v.foldIndexed(0) { i, a, v -> a + i * v }
                     s.connections.mapNotNull { nr[it] }.forEach { r ->
                         v.forEachIndexed { i, c -> if (i > 1) r[i - 1] += c }
                     }
                 }
-                sm.filter { it.value.energy >= limit }.forEach { exploded ->
-                    sm.remove(exploded.key)
+                stages.filter { it.value.energy >= limit }.forEach { exploded ->
+                    stages.remove(exploded.key)
                     exploded.value.connections.mapNotNull { nr[it] }.forEach { r -> r[10] += 1 }
                 }
                 receiving = nr.filter { r -> r.value.any { it > 0 } }
             }
-            val b = sm.values.sumOf { it.energy }
-            maxEnergy = maxOf(maxEnergy, b)
+            maxEnergy = maxOf(maxEnergy, stages.values.sumOf { it.energy })
         }
         return maxEnergy
     }
