@@ -5,11 +5,11 @@ object Quest09 {
     private data class Tree(val growth: Int, val limit: Int) {
         private val g2 = growth / 2
 
-        fun grow(part: Part): Int {
+        fun grow(): Int {
             val branches = mutableListOf(1)
             var seconds = 1
             var splits = 0
-            while (splits + (if (part == ONE) branches.sum() else 1) < limit) {
+            while (splits + branches.sum() < limit) {
                 var added = 0
                 for (i in branches.indices) {
                     val b = branches[i]
@@ -35,7 +35,7 @@ object Quest09 {
                 val c = branches[k]!!
                 val d = growth - k
                 branches.remove(k)
-                branches.entries.sortedByDescending { it.key }.forEach { (height, count)  ->
+                branches.entries.sortedByDescending { it.key }.forEach { (height, count) ->
                     branches[height + d] = branches.getOrDefault(height + d, 0) + count
                     branches.remove(height)
                 }
@@ -52,7 +52,7 @@ object Quest09 {
     private fun parse2(input: List<String>) = input.map { it.longs() }.associate { it[0] to Tree2(it[1], it[2]) }
 
     fun one(input: List<String>): Int {
-        return parse(input).values.sumOf { it.grow(ONE) }
+        return parse(input).values.sumOf { it.grow() }
     }
 
     fun two(input: List<String>): Long {
@@ -82,10 +82,10 @@ val Quest09Test by testSuite {
         }
 
         test("two") {
-            two(sample) shouldBe 42
+            two(sample) shouldBe 42L
 
             val input = lines(quest, 2)
-            two(input) shouldBe 15448
+            two(input) shouldBe 15448L
         }
 
         test("three") {
