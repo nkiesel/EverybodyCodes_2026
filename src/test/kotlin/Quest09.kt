@@ -36,11 +36,11 @@ object Quest09 {
                 val d = growth - k
                 branches.remove(k)
                 branches.entries.sortedByDescending { it.key }.forEach { (height, count) ->
-                    branches[height + d] = branches.getOrDefault(height + d, 0) + count
+                    branches.merge(height + d, count, Long::plus)
                     branches.remove(height)
                 }
-                branches[1L] = branches.getOrDefault(1L, 0) + c
-                branches[g2] = branches.getOrDefault(g2, 0) + c * 2L
+                branches.merge(1L, c, Long::plus)
+                branches.merge(g2, c * 2L, Long::plus)
                 leaves += c
                 seconds += d
             }
