@@ -7,7 +7,7 @@ object Quest10 {
     private fun parse(input: List<String>): Pair<CharArea, List<Ghost>> {
         val area = CharArea(input)
         var id = 0
-        return area to area.tiles('<', '>', 'v', '^').map { Ghost(id++, it, Direction.from(area[it])) }.toList()
+        return area to area.tiles('<', '>', 'v', '^').map { Ghost(id++, it, Direction(area[it])) }.toList()
     }
 
     fun one(input: List<String>): Int {
@@ -38,35 +38,7 @@ object Quest10 {
         return collisions
     }
 
-    fun two(input: List<String>, limit: Long): Long {
-        var (area, ghosts) = parse(input)
-        var rounds = 0L
-        do {
-            rounds++
-            val ng = buildList {
-                for (g in ghosts) {
-                    val np = g.p.move(g.d)
-                    if (area[np] == '#') {
-                        if (g.c + 1 < limit) add(g.copy(d = g.d.turnRight(), c = g.c + 1))
-                    } else {
-                        add(g.copy(p = np))
-                    }
-                }
-            }
-            ghosts = buildList {
-                for (gc in ng.groupBy { it.p }.values) {
-                    if (gc.size > 1) {
-                        gc.forEach { g -> if (g.c + 1 < limit) add(g.copy(d = g.d.reverse(), c = g.c + 1)) }
-                    } else {
-                        add(gc.first())
-                    }
-                }
-            }
-        } while (ghosts.isNotEmpty())
-        return rounds
-    }
-
-    fun three(input: List<String>, limit: Long): Long {
+    fun twoThree(input: List<String>, limit: Long, part: Part): Long {
         var (area, ghosts) = parse(input)
         var rounds = 0L
         var history = mutableListOf(ghosts to 0L)
@@ -94,10 +66,10 @@ object Quest10 {
                     }
                 }
             }
-            if (collisions) {
-                history = history.filter { it.first.size == ghosts.size }.toMutableList()
-                for ((hg, ht) in history) {
-                    if (ghosts.size == hg.size) {
+            if (part == THREE) {
+                if (collisions) {
+                    history = history.filter { it.first.size == ghosts.size }.toMutableList()
+                    for ((hg, ht) in history) {
                         val pp = ghosts.map { g -> g to hg.first { g.i == it.i } }
                         if (pp.all { (g, p) -> p.p == g.p && p.d == g.d }) {
                             val f = pp.minOf { (g, p) -> (limit - g.c) / (g.c - p.c) }
@@ -111,8 +83,8 @@ object Quest10 {
                         }
                     }
                 }
+                history += ghosts to rounds
             }
-            history += ghosts to rounds
         } while (ghosts.isNotEmpty())
         return rounds
     }
@@ -144,11 +116,11 @@ val Quest10Test by testSuite {
         }
 
         test("two") {
-            two(sample, 10L) shouldBe 53L
-            two(sample, 10000L) shouldBe 50000L
+            twoThree(sample, 10L, TWO) shouldBe 53L
+            twoThree(sample, 10000L, TWO) shouldBe 50000L
 
             val input = lines(quest, 2)
-            two(input, 10000L) shouldBe 139791L
+            twoThree(input, 10000L, TWO) shouldBe 139791L
         }
 
         test("three") {
@@ -177,10 +149,10 @@ val Quest10Test by testSuite {
                 ###########.###########
                 #######################
             """.trimIndent().lines()
-            three(sample, 1000000000000L) shouldBe 13314695352588L
+            twoThree(sample, 1000000000000L, THREE) shouldBe 13314695352588L
 
             val input = lines(quest, 3)
-            three(input, 1000000000000L) shouldBe 14349949056099L
+            twoThree(input, 1000000000000L, THREE) shouldBe 14349949056099L
         }
     }
 }
