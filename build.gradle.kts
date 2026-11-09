@@ -41,6 +41,7 @@ kotlin {
     sourceSets {
         test {
             dependencies {
+                implementation(libs.nkiesel.gameutils)
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.testBalloon.framework.core)
             }
