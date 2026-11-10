@@ -34,6 +34,7 @@ kotlin {
                 "nested-type-aliases",
                 "collection-literals",
                 "explicit-backing-fields",
+                "name-based-destructuring=name-mismatch",
             ).map { "-X$it" }
         )
     }
