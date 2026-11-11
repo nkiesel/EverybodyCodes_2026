@@ -125,25 +125,25 @@ val Quest11Test by testSuite {
         }
 
         test("three") {
-//            val sample1 = """
-//                portals: 32
-//
-//                1 10
-//                20 30
-//                15 29
-//                13 10
-//            """.trimIndent().lines()
-//            three(sample1) shouldBe 854
-//
-//            val sample2 = """
-//                portals: 64
-//
-//                1 40
-//                3 35
-//                5 42
-//                7 50
-//            """.trimIndent().lines()
-//            three(sample2) shouldBe 9634
+            val sample1 = """
+                portals: 32
+
+                1 10
+                20 30
+                15 29
+                13 10
+            """.trimIndent().lines()
+            three(sample1) shouldBe 854
+
+            val sample2 = """
+                portals: 64
+
+                1 40
+                3 35
+                5 42
+                7 50
+            """.trimIndent().lines()
+            three(sample2) shouldBe 9634
 
             val input = lines(quest, 3)
             three(input) shouldBe 20732
