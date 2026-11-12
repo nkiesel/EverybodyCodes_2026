@@ -1,16 +1,13 @@
 import de.infix.testBalloon.framework.core.testSuite
-import io.kotest.matchers.ints.shouldNotBeInRange
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import kotlin.text.isBlank
 
 object Quest13 {
-    data class Hand(val hands: Int, val direction: Int, val current: Int, val move: Int) {
+    data class Hand(val hands: Int, val direction: Int, val current: Int, val move: Long) {
         var position: Int = 0
         var previous: Int = 0
         var factor: Int = 1
         var max: Int = 0
-        var active = move != 0
+        var active = move != 0L
 
         fun range(): Set<Int> {
             return if (direction == 1) {
@@ -39,7 +36,7 @@ object Quest13 {
         }
 
         fun different(o: Hand): Boolean {
-            return direction != o.direction || hands != o.hands || current != o.current
+            return direction != o.direction || hands != o.hands || current != o.current || active != o.active
         }
     }
 
@@ -47,21 +44,32 @@ object Quest13 {
         val hands = input[0].ints()
         val direction = input[1].substringAfter(" ").split(":")
         val current = input[2].ints()
-        val move = input[3].ints()
+        val move = input[3].longs()
         return (0..2).map { Hand(hands[it], if (direction[it] == "CW") 1 else -1, current[it], move[it]) }
     }
 
-    fun one(input: List<String>): Int {
+    private data class HistoryKey(
+        val p1: Int,
+        val p2: Int,
+        val p3: Int,
+        val a1: Boolean,
+        val a2: Boolean,
+        val a3: Boolean
+    )
+
+    fun one(input: List<String>): Long {
         val hands = parse(input)
         val positions = lcm(hands.map { it.hands })
+        val history = mutableMapOf<HistoryKey, Pair<Long, Long>>()
         hands.forEach {
             it.factor = positions / it.hands
             it.position = it.current * it.factor
             it.max = positions
         }
-        var calibrations = 0
-//        println("start positions: ${hands.map { it.position }}")
-        for (tick in 1..hands.maxOf { it.move }) {
+        var calibrations = 0L
+        var tick = 0L
+        val maxMoves = hands.maxOf { it.move }
+        while (++tick <= maxMoves) {
             for (h in hands) {
                 h.active = tick <= h.move
                 if (h.active) {
@@ -74,41 +82,36 @@ object Quest13 {
                 for (i2 in i1 + 1 until hands.size) {
                     val h2 = hands[i2]
                     if ((h1.active || h2.active) && h1.different(h2)) {
-                            if (h1.overlap(h2) || h2.overlap(h1)) {
-                                calibrations++
-//                                println("calibration #$calibrations at tick $tick\n    h1 $h1\n    h2 $h2")
-                            }
+                        if (h1.overlap(h2) || h2.overlap(h1)) {
+                            calibrations++
+                        }
                     }
                 }
             }
             val current = hands.map { it.position }
-//            println("$calibrations calibrations after step $tick, current positions: $current")
+            val key =
+                HistoryKey(current[0], current[1], current[2], hands[0].active, hands[1].active, hands[2].active)
+            val previous = history[key]
+            if (previous != null) {
+                val minMoves = hands.filter { it.active }.minOf { it.move }
+                val d = (minMoves - tick) / (tick - previous.first)
+                tick += d * (tick - previous.first)
+                calibrations += d * (calibrations - previous.second)
+                history.clear()
+            } else {
+                history[key] = tick to calibrations
+            }
         }
 
         return calibrations
     }
 
-    fun twoTest(input: List<String>): Int {
-        var total = 0
-        for (lines in input.chunkedBy(String::isBlank)) {
-            if (lines.size != 6) continue
-            val name = lines.first()
-            val expected = lines.last().ints()[0]
-            val result = one(lines.drop(1).dropLast(1))
-            if (result != expected) {
-                println("$name expected $expected, got $result")
-            }
-            total += result
-        }
-        return total
-    }
-
-    fun two(input: List<String>): Int {
+    fun two(input: List<String>): Long {
         return input.chunkedBy(String::isBlank).sumOf { one(it) }
     }
 
-    fun three(input: List<String>): Int {
-        return 0
+    fun three(input: List<String>): Long {
+        return input.chunkedBy(String::isBlank).sumOf { one(it) }
     }
 }
 
@@ -142,7 +145,6 @@ val Quest13Test by testSuite {
             one(sample3) shouldBe 9
 
             val input = lines(quest, 1)
-            one(input) shouldNotBeInRange 38..38
             one(input) shouldBe 26
         }
 
@@ -166,18 +168,12 @@ val Quest13Test by testSuite {
             two(sample) shouldBe 21
 
             val input = lines(quest, 2)
-            val two = two(input)
-            two shouldNotBe 128798
-            two shouldBe 128678
+            two(input) shouldBe 128678
         }
 
         test("three") {
-            val sample = """
-            """.trimIndent().lines()
-            three(sample) shouldBe 0
-
-//            val input = lines(quest, 3)
-//            three(input) shouldBe 0
+            val input = lines(quest, 3)
+            three(input) shouldBe 1017007696393L
         }
     }
 }
