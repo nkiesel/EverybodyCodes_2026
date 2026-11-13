@@ -2,7 +2,7 @@ import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.shouldBe
 
 object Quest11 {
-    private fun parse(input: List<String>): Pair<Int, List<UndirectedEdge>> {
+    private fun parse(input: List<String>): Pair<Int, List<UndirectedEdge<Int>>> {
         val portals = input[0].substringAfter(": ").toInt()
         val extra =
             input.drop(2).map { lines -> lines.split(' ').map { it.toInt() }.let { UndirectedEdge(it[0], it[1], 1) } }
