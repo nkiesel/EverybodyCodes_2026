@@ -34,16 +34,19 @@ object Quest17 {
         area1.tiles(' ').forEach { p ->
             val n = area1.neighbors4(p, '*')
             area1[p] = when (n.size) {
-                4 -> if (area1[p.x - 1, p.y - 1] == '#') '<' else '>'
-                2 ->
-                    when {
-                        n.all { it.x == p.x } -> '|'
-                        n.all { it.y == p.y } -> '-'
-                        n.all { it.x >= p.x && it.y >= p.y } -> 'F'
-                        n.all { it.x <= p.x && it.y <= p.y } -> 'J'
-                        n.all { it.x <= p.x && it.y >= p.y } -> '7'
-                        else -> 'L'
-                    }
+                4 -> when {
+                    area1[p.x - 1, p.y - 1] == '#' -> '<'
+                    else -> '>'
+                }
+
+                2 -> when {
+                    n.all { it.x == p.x } -> '|'
+                    n.all { it.y == p.y } -> '-'
+                    n.all { it.x >= p.x && it.y >= p.y } -> 'F'
+                    n.all { it.x <= p.x && it.y <= p.y } -> 'J'
+                    n.all { it.x <= p.x && it.y >= p.y } -> '7'
+                    else -> 'L'
+                }
 
                 else -> ' '
             }
