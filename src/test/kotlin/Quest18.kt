@@ -24,11 +24,11 @@ object Quest18 {
 
     fun two(input: List<String>): Int {
         val tops = parse(input)
-        val mx = tops.maxOf { it.x } + tops.last().w
-        val my = tops.maxOf { it.y }
-        val area = CharArea(mx + 1, my + 1, '.')
+        val maxx = tops.maxOf { it.x } + tops.last().w
+        val maxy = tops.maxOf { it.y }
+        val area = CharArea(maxx + 1, maxy + 1, '.')
         tops.forEach { [x, y, w] ->
-            (0..<w).forEach { dx -> (0..<y).forEach { y -> area[x + dx, my - y] = '#' } }
+            (0..<w).forEach { dx -> (0..<y).forEach { y -> area[x + dx, maxy - y] = '#' } }
         }
         for (y in area.yRange) {
             val lx = area.row(y).indexOfFirst { it == '#' }
@@ -40,9 +40,9 @@ object Quest18 {
 
     fun three(input: List<String>): Long {
         val tops = parse(input)
-        val maxy = tops.maxOf { it.y }
         val minx = tops.first().x
         val maxx = tops.last().x + tops.last().w
+        val maxy = tops.maxOf { it.y }
         var total = 0L
         for (y in 0..<maxy) {
             val lx = tops.first { it.y >= maxy - y }.x
