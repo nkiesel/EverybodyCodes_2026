@@ -11,7 +11,7 @@ object Quest14 {
     }
 
     fun two(input: List<String>, part: Part = TWO): Int {
-        val area = parse(input).surround(" ")
+        val area = parse(input).surround(' ')
         val connections = mutableListOf<UndirectedEdge<Char>>()
         val seen = mutableSetOf<Char>()
         area.tiles().forEach { p ->

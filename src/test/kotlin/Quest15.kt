@@ -81,11 +81,12 @@ object Quest15 {
         var p = start
         var d = Direction.N
         var rx = 0
-        var steps = 0
+        var stepsU = 1
+        var stepsD = 1
         var depU = 0
         var depD = 0
         do {
-            steps++
+            if (p.y < start.y) stepsU++ else if (p.y > start.y) stepsD++
             var n = p.move(d)
             if (area[n] == '#') {
                 d = d.turnRight()
@@ -97,7 +98,7 @@ object Quest15 {
             }
             if (rx == 0 && p.y == start.y) rx = p.x
         } while (p != start)
-        return StatB(depU, depD, start.x, rx, steps)
+        return StatB(depU, depD, start.x, rx, stepsU, stepsD)
     }
 
     private data class Stat(val dep: Int, val lx: Int, val rx: Int, val steps: Int) {
@@ -128,8 +129,9 @@ object Quest15 {
         fun wraps(other: Stat) = (lx <= other.lx && rx >= other.rx)
     }
 
-    private data class StatB(val depU: Int, val depD: Int, val lx: Int, val rx: Int, val steps: Int) {
+    private data class StatB(val depU: Int, val depD: Int, val lx: Int, val rx: Int, val stepsU: Int, val stepsD: Int) {
         val dep = depU + depD
+        val steps = stepsU + stepsD
         val width = rx - lx
         val rate = (dep).toDouble() / steps
     }
@@ -185,7 +187,7 @@ object Quest15 {
         val e = area.first('E')
         var p = s
         val usedX = mutableSetOf<Int>()
-        val loop = buildList {
+        val loops = buildList {
             while (p != e) {
                 p = p.move(Direction.E)
                 if (p.x !in usedX && area[p.move(Direction.N)] != '#') {
@@ -194,12 +196,44 @@ object Quest15 {
                     add(l)
                 }
             }
-        }.maxBy { it.rate }
+        }
 
+        val loop = loops.maxBy { it.rate }
         val required = 202620262026L
-        var steps = required / loop.dep * loop.steps + e.x
-        if (required % loop.dep != 0L) steps += loop.steps / 2 - loop.width
-        return steps
+        val loopCount = required / loop.dep
+        var loopSteps = loop.steps * loopCount
+        val missing = required - loop.dep * loopCount
+        if (missing > 0) {
+            val queue = ArrayDeque<List<Pair<StatB, Direction>>>()
+            for (l in loops) {
+                if (l.depU <= missing) queue.add(listOf(Pair(l, Direction.N)))
+                if (l.depD <= missing) queue.add(listOf(Pair(l, Direction.S)))
+                if (l.dep <= missing) queue.add(listOf(Pair(l, Direction.N), Pair(l, Direction.S)))
+            }
+            var minSteps = Int.MAX_VALUE
+            var best = listOf<Pair<StatB, Direction>>()
+            while (queue.isNotEmpty()) {
+                val chain = queue.removeFirst()
+                val steps = chain.sumOf { if (it.second == Direction.N) it.first.stepsU else it.first.stepsD }
+                if (steps > minSteps) continue
+                val deps = chain.sumOf { if (it.second == Direction.N) it.first.depU else it.first.depD }
+                val req = missing - deps
+                if (req == 0L && steps < minSteps) {
+                    minSteps = steps
+                    best = chain
+                } else {
+                    val lastX = chain.last().first.rx
+                    loops.filter { it.lx >= lastX }.forEach { l ->
+                        if (l.depU <= missing - deps) queue.add(listOf(Pair(l, Direction.N)))
+                        if (l.depD <= missing - deps) queue.add(listOf(Pair(l, Direction.S)))
+                        if (l.dep <= missing - deps) queue.add(listOf(Pair(l, Direction.N), Pair(l, Direction.S)))
+                    }
+                }
+            }
+            val bs = best.sumOf { if (it.second == Direction.N) it.first.stepsU else it.first.stepsD }
+            loopSteps += bs
+        }
+        return loopSteps
     }
 }
 

@@ -18,12 +18,12 @@ object Quest17 {
     }
 
     fun two(input: List<String>): Int {
-        val area = CharArea(input).surround(".")
+        val area = CharArea(input).surround('.')
         return area.tiles('#').sumOf { area.neighbors4(it, '.').size }
     }
 
     fun three(input: List<String>): Int {
-        val area1 = CharArea(input[0].length * 2 - 1, input.size * 2 - 1, ' ').surround(" ").surround(".")
+        val area1 = CharArea(input[0].length * 2 - 1, input.size * 2 - 1, ' ').surround(' ', '.')
         for (x in input[0].indices) for (y in input.indices) {
             area1[x * 2 + 2, y * 2 + 2] = input[y][x]
         }
