@@ -55,6 +55,30 @@ object Quest18 {
         }
         return total
     }
+
+    fun threeFaster(input: List<String>): Long {
+        val tops = parse(input)
+        val minx = tops.first().x
+        val maxx = tops.last().x + tops.last().w
+        val maxy = tops.maxOf { it.y }
+        val ymap = tops.groupBy { it.y }.mapValues { l -> [l.value.first().x, l.value.last().let { it.x + it.w - 1 }]  }.toSortedMap(reverseOrder())
+        ymap.entries.zipWithNext { t, b ->
+            val h = t.key - b.key
+            val x = t.value union b.value
+
+        }
+        var total = 0L
+        for (y in 0..<maxy) {
+            val lx = tops.first { it.y >= maxy - y }.x
+            val rx = tops.last { it.y >= maxy - y }.let { it.x + it.w }
+            if (lx == minx && rx == maxx) {
+                total += (rx - lx).toLong() * (maxy - y)
+                break
+            }
+            total += rx - lx
+        }
+        return total
+    }
 }
 
 val Quest18Test by testSuite {
@@ -96,6 +120,7 @@ val Quest18Test by testSuite {
                 x=31 y=6 width=1
             """.trimIndent().lines()
             two(sample) shouldBe 205
+            threeFaster(sample) shouldBe 205L
             three(sample) shouldBe 205L
 
             val input = lines(quest, 2)

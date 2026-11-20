@@ -13,7 +13,7 @@ object Quest17 {
                 }
             }
         }
-        val sp = ShortestPathSolver(edges).shortedPath(Point(0, 0), Point(lx, ly))
+        val sp = ShortestPathSolver(edges).shortestPath(Point(0, 0), Point(lx, ly))
         return sp?.first ?: 0
     }
 

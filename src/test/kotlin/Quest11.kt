@@ -14,10 +14,10 @@ object Quest11 {
         val initial = (1 until portals).map { UndirectedEdge(it, it + 1, 1) }.toMutableList()
         initial += UndirectedEdge(portals, 1, 1)
         val s1 = ShortestPathSolver(initial)
-        val n1 = (2..portals).sumOf { s1.shortedPath(1, it)!!.first }
+        val n1 = (2..portals).sumOf { s1.shortestPath(1, it)!!.first }
         val s2 = ShortestPathSolver(initial + extra)
         val n2 = (1..portals).sumOf { a ->
-            (1..portals).filter { it != a }.sumOf { b -> s2.shortedPath(a, b)!!.first }
+            (1..portals).filter { it != a }.sumOf { b -> s2.shortestPath(a, b)!!.first }
         }
         return n1 * portals - n2
     }
@@ -27,7 +27,7 @@ object Quest11 {
         val r3 = (1..portals).toList() + (1..4).toList()
         val initial = (1..portals).flatMap { p -> r3.subList(p, p + 3).map { UndirectedEdge(p, it, 1) } }
         val s1 = ShortestPathSolver(initial)
-        val n1 = (2..portals).sumOf { s1.shortedPath(1, it)!!.first }
+        val n1 = (2..portals).sumOf { s1.shortestPath(1, it)!!.first }
         val combined = initial + extra
         val connected = combined.map { (from, to) -> setOf(from, to) }.toSet()
         val crystals = buildList {
@@ -42,7 +42,7 @@ object Quest11 {
         val n2 = crystals.minOf { crystal ->
             val s2 = ShortestPathSolver(combined + crystal)
             (1..portals).sumOf { a ->
-                (1..portals).filter { it != a }.sumOf { b -> s2.shortedPath(a, b, maxDistance = best)!!.first }
+                (1..portals).filter { it != a }.sumOf { b -> s2.shortestPath(a, b, maxDistance = best)!!.first }
             }.also { best = minOf(it, best) }
         }
         return n1 * portals - n2
@@ -72,7 +72,7 @@ object Quest11 {
         val r3 = (1..portals).toList() + (1..4).toList()
         val initial = (1..portals).flatMap { p -> r3.subList(p, p + 3).map { UndirectedEdge(p, it, 1) } }
         val s1 = ShortestPathSolver(initial)
-        val n1 = (2..portals).sumOf { s1.shortedPath(1, it)!!.first }
+        val n1 = (2..portals).sumOf { s1.shortestPath(1, it)!!.first }
         val combined = initial + extra
         val cn = portals / 8
         val crystals = buildList {
@@ -87,7 +87,7 @@ object Quest11 {
         val n2 = crystals.minOf { crystal ->
             val s2 = ShortestPathSolver(combined + crystal)
             (1..portals).sumOf { a ->
-                (1..portals).filter { it != a }.sumOf { b -> s2.shortedPath(a, b, maxDistance = best)!!.first }
+                (1..portals).filter { it != a }.sumOf { b -> s2.shortestPath(a, b, maxDistance = best)!!.first }
             }.also { best = minOf(it, best) }
         }
         return n1 * portals - n2
