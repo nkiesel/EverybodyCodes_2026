@@ -37,7 +37,7 @@ object Quest19 {
     }
 
     fun three(input: List<String>): Long {
-        val count = (input[0].length * input.size).toLong()
+        val count = input[0].length.toLong() * input.size
         val numK = input.sumOf { l -> l.count { it == 'K' }.toLong() }
         val other = count - numK
         val q2 = other / 2
