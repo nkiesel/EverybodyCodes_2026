@@ -31,7 +31,7 @@ object Quest19 {
     fun two(input: List<String>): Long {
         val [a, b] = parse(input)
         return chars.permutations().maxOf { perm ->
-            val bm = perm.withIndex().associate { [i, c] -> (i + 1).digitToChar() to c }
+            val bm = perm.indices.associate{ (it + 1).digitToChar() to perm[it] }
             solution(a, b, bm)
         }
     }
