@@ -4,11 +4,10 @@ import io.kotest.matchers.shouldBe
 object Quest19 {
     private fun parse(input: List<String>) = input.chunkedBy(String::isEmpty)
 
-    fun one(input: List<String>): Long {
-        val [a, b] = parse(input)
+    private fun solution(a: List<String>, b: List<String>, bm: Map<Char, Char>): Long {
         val cm = CountingMap<Char>()
         for (y in a.indices) for (x in a[0].indices) {
-            val p = listOf(a[y][x], b[y][x]).sorted()
+            val p = listOf(a[y][x], bm[b[y][x]]!!).sorted()
             val r = when {
                 p[0] == 'K' || p[1] == 'K' -> 'K'
                 p[0] == 'C' && p[1] == 'M' -> 'B'
@@ -21,30 +20,25 @@ object Quest19 {
         return cm.values().sorted().takeLast(3).product()
     }
 
+    private val chars = ['M', 'C', 'Y', 'K']
+
+    fun one(input: List<String>): Long {
+        val [a, b] = parse(input)
+        val bm = chars.associateWith { it }
+        return solution(a, b, bm)
+    }
+
     fun two(input: List<String>): Long {
         val [a, b] = parse(input)
-        return ['M', 'C', 'Y', 'K'].permutations().maxOf { perm ->
-            val cm = CountingMap<Char>()
+        return chars.permutations().maxOf { perm ->
             val bm = perm.withIndex().associate { [i, c] -> (i + 1).digitToChar() to c }
-            for (y in a.indices) for (x in a[0].indices) {
-                val p = [a[y][x], bm[b[y][x]]!!].sorted()
-                cm.inc(
-                    when {
-                        p[0] == 'K' || p[1] == 'K' -> 'K'
-                        p[0] == 'C' && p[1] == 'M' -> 'B'
-                        p[0] == 'C' && p[1] == 'Y' -> 'G'
-                        p[0] == 'M' && p[1] == 'Y' -> 'R'
-                        else -> p[0]
-                    }
-                )
-            }
-            cm.values().sorted().takeLast(3).product()
+            solution(a, b, bm)
         }
     }
 
     fun three(input: List<String>): Long {
         val count = (input[0].length * input.size).toLong()
-        val numK = input.sumOf { l -> l.count { it == 'K' } }.toLong()
+        val numK = input.sumOf { l -> l.count { it == 'K' }.toLong() }
         val other = count - numK
         val q2 = other / 2
         val withK = numK * q2 * when (other % 2) {
