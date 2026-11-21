@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 object Quest20 {
     private fun parse(input: List<String>) = input.map { it.replace(" ", "") }
 
-    private val regex = Regex("""([\dA]+)([-+])([\dA]+)=([\dA]+)([-+])([\dA]+)""")
+    private val regex = Regex("""(.+)([-+])(.+)=(.+)([-+])(.+)""")
 
     private val segments = mapOf(
         '0' to 6,
@@ -17,10 +17,10 @@ object Quest20 {
         '7' to 3,
         '8' to 7,
         '9' to 6,
+        'A' to 6,
         '+' to 2,
         '-' to 1,
         '=' to 2,
-        'A' to 6,
     )
 
     private val moveSegments = mapOf(
@@ -60,7 +60,7 @@ object Quest20 {
         val d = g[6].toInt(radix)
         val l = if (g[2] == "+") a + b else a - b
         val r = if (g[5] == "+") c + d else c - d
-        return if (l == r) line.filter { it != ' ' }.sumOf { segments[it]!! } else null
+        return if (l == r) line.sumOf { segments[it]!! } else null
     }
 
     private fun oneTwo(input: List<String>, radix: Int): String {
@@ -68,88 +68,66 @@ object Quest20 {
     }
 
     fun one(input: List<String>) = oneTwo(input, 10)
+
     fun two(input: List<String>) = oneTwo(input, 11)
 
     fun three(input: List<String>): String {
         var total = 0L
+        val radix = 11
+
+        fun validLine(line: CharArray): Boolean {
+            val sc = segmentCount(line.concatToString(), radix)
+            if (sc != null) total += sc
+            return sc != null
+        }
+
         line@ for (line in parse(input)) {
-            val c = segmentCount(line, 11)
-            if (c != null) {
-                total += c
-                continue@line
-            }
             val lc = line.toCharArray()
+            if (validLine(lc)) continue@line
 
             for (i in lc.indices) {
-                val c = lc[i]
-                val m = moveSegments[c]
-                if (m != null) {
-                    for (o in m) {
-                        lc[i] = o
-                        val sc = segmentCount(lc.concatToString(), 11)
-                        if (sc != null) {
-                            total += sc
-                            continue@line
-                        }
-                    }
-                    lc[i] = c
+                val c1 = lc[i]
+                for (o in moveSegments[c1].orEmpty()) {
+                    lc[i] = o
+                    if (validLine(lc)) continue@line
                 }
+                lc[i] = c1
             }
 
             for (i in lc.indices) {
-                val c = lc[i]
-                val rm = removeSegments[c]
-                if (rm != null) {
-                    for (r in rm) {
-                        lc[i] = r
-                        for (j in i + 1 until lc.size) {
-                            val o = lc[j]
-                            val ad = addSegments[o]
-                            if (ad != null) {
-                                for (a in ad) {
-                                    lc[j] = a
-                                    val sc = segmentCount(lc.concatToString(), 11)
-                                    if (sc != null) {
-                                        total += sc
-                                        continue@line
-                                    }
-                                }
-                            }
-                            lc[j] = o
+                val c1 = lc[i]
+                for (r in removeSegments[c1].orEmpty()) {
+                    lc[i] = r
+                    for (j in i + 1 until lc.size) {
+                        val c2 = lc[j]
+                        for (a in addSegments[c2].orEmpty()) {
+                            lc[j] = a
+                            if (validLine(lc)) continue@line
                         }
+                        lc[j] = c2
                     }
-                    lc[i] = c
                 }
+                lc[i] = c1
             }
 
             for (i in lc.indices) {
-                val c = lc[i]
-                val rm = addSegments[c]
-                if (rm != null) {
-                    for (r in rm) {
-                        lc[i] = r
-                        for (j in i + 1 until lc.size) {
-                            val o = lc[j]
-                            val ad = removeSegments[o]
-                            if (ad != null) {
-                                for (a in ad) {
-                                    lc[j] = a
-                                    val sc = segmentCount(lc.concatToString(), 11)
-                                    if (sc != null) {
-                                        total += sc
-                                        continue@line
-                                    }
-                                }
-                            }
-                            lc[j] = o
+                val c1 = lc[i]
+                for (r in addSegments[c1].orEmpty()) {
+                    lc[i] = r
+                    for (j in i + 1 until lc.size) {
+                        val c2 = lc[j]
+                        for (a in removeSegments[c2].orEmpty()) {
+                            lc[j] = a
+                            if (validLine(lc)) continue@line
                         }
+                        lc[j] = c2
                     }
-                    lc[i] = c
                 }
+                lc[i] = c1
             }
         }
 
-        return total.toString(11)
+        return total.toString(radix)
     }
 }
 
